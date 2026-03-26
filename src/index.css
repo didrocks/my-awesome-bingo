@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Coffee Shop Theme Colors */
+  /* Coffee Shop Theme Colors (used by game screens) */
   --color-accent: #6B4226;           /* espresso brown */
   --color-accent-light: #8B6F47;     /* coffee brown */
   --color-marked: #F4E8D8;           /* cream/cappuccino foam */
@@ -13,6 +13,16 @@
   --color-text-primary: #3E2723;     /* dark espresso */
   --color-text-secondary: #6B4226;   /* medium coffee */
   --color-text-muted: #8D7B68;       /* mocha */
+
+  /* Vaporwave Sunset Theme (start screen) */
+  --color-vs-bg-deep: #0D0221;       /* deep space purple */
+  --color-vs-bg-mid: #1A0533;        /* dusk violet */
+  --color-vs-bg-dusk: #3D0B55;       /* sunset purple */
+  --color-vs-pink: #FF2D87;          /* neon pink */
+  --color-vs-pink-glow: #FF006E;     /* hot pink */
+  --color-vs-cyan: #00D9F5;          /* electric cyan */
+  --color-vs-cyan-dark: #0066FF;     /* deep blue */
+  --color-vs-orange: #FF7700;        /* sunset orange */
 }
 
 html,
@@ -26,4 +36,54 @@ body {
   font-family: Georgia, 'Times New Roman', serif, system-ui, -apple-system, sans-serif;
   -webkit-tap-highlight-color: transparent;
   background-color: var(--color-bg);
+}
+
+/* Start screen entrance animation */
+@keyframes vs-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Neon title glow pulse */
+@keyframes vs-glow-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 18px rgba(255, 45, 135, 0.85),
+      0 0 40px rgba(255, 45, 135, 0.45);
+  }
+  50% {
+    text-shadow:
+      0 0 28px rgba(255, 45, 135, 1),
+      0 0 60px rgba(255, 45, 135, 0.65),
+      0 0 90px rgba(0, 217, 245, 0.3);
+  }
+}
+
+/* Retro perspective grid scroll */
+@keyframes vs-grid-scroll {
+  from { background-position: center 0; }
+  to   { background-position: center 80px; }
+}
+
+/* Staggered card reveal */
+@keyframes vs-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Suppress motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .vs-animate { animation: none !important; }
 }
