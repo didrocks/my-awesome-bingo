@@ -1,78 +1,40 @@
-# Copilot Instructions for Soc Ops (Bingo)
+# Soc Ops — Workspace Instructions
 
-React + TypeScript social mixer Bingo game. Mark squares to find 5-in-a-row with people at events. Deploys to GitHub Pages.
+Social Bingo for in-person mixers. React 19 + TypeScript + Tailwind CSS v4 + Vite. Deploys to GitHub Pages on push to `main`.
 
-## Development Checklist
-Before committing changes, verify:
-- [ ] `npm run lint` passes (ESLint with TS + React hooks)
-- [ ] `npm run build` succeeds (TypeScript + Vite)
-- [ ] `npm run test` passes (Vitest unit tests)
+## Checklist (always run before done)
+- [ ] `npm run lint` — no ESLint errors
+- [ ] `npm run build` — TypeScript & Vite build passes
+- [ ] `npm test` — all Vitest tests pass
+
+## Commands
+```bash
+npm run dev    # Vite dev server, port 5173
+npm run build  # tsc -b && vite build
+npm run lint && npm test
+```
 
 ## Architecture
-- **[useBingoGame](../src/hooks/useBingoGame.ts)** - single source of truth for game state (start → playing → bingo)
-- **[bingoLogic.ts](../src/utils/bingoLogic.ts)** - pure functions: `generateBoard()`, `checkBingo()`, `toggleSquare()`
-- **localStorage** - versioned persistence with validation, SSR guards (`typeof window`)
 
-**State Pattern**: Board always immutable (fresh arrays), `queueMicrotask()` coordinates setState, never mutate components
+`App.tsx` switches between two modes via `appMode: AppMode | null`:
+- **Bingo** — `GameScreen` + `useBingoGame` — 5×5 board, click to mark, win detection
+- **Card Deck** — `CardDeckScreen` + `useCardDeck` — shuffle deck, tap to flip
 
-## Key Types ([src/types/index.ts](../src/types/index.ts))
-- `BingoSquareData` - {id, text, isMarked, isFreeSpace}
-- `BingoLine` - {type: 'row'|'column'|'diagonal', index, squares[]}
-- `GameState` - 'start' | 'playing' | 'bingo'
+Key files: `src/types/index.ts` (all types), `src/data/questions.ts`, `src/utils/bingoLogic.ts` (pure functions), `src/utils/bingoLogic.test.ts`.
 
-## Board Rules
-- 5×5 grid, center (index 12) = FREE_SPACE (auto-marked)
-- 24 questions from [src/data/questions.ts](../src/data/questions.ts), shuffled via Fisher-Yates
-- Winning: 5 in row/column/diagonal (checked after each toggle)
-
-## Testing ([bingoLogic.test.ts](../src/utils/bingoLogic.test.ts))
-- Exhaustive: board generation, immutability, all 5 line types, edge cases
-- Mock `Math.random` for deterministic randomization tests
-- Use Vitest + `@testing-library/react`
+Conventions: types in `src/types/index.ts` · hooks hold state · pure utils in `src/utils/` · named exports per component file.
 
 ## Styling
-- **Tailwind v4** - `@theme` directive in CSS (no config file)
-- Mobile-first: `flex`, `min-h-full`, `active:bg-gray-100`
-- Native opacity: `bg-black/50`, container queries: `@container`, `@md:text-lg`
 
-## Design System: Cozy Coffee Shop Theme
+Tailwind CSS v4 via `@theme` in `src/index.css` — see [tailwind-4.instructions.md](.github/instructions/tailwind-4.instructions.md). Coffee Shop theme tokens: `--color-accent` `--color-bg` `--color-surface` `--color-marked` `--color-bingo` `--color-text-primary`. Base font: Georgia serif.
 
-### Color Palette ([index.css](../src/index.css))
-Use CSS custom properties defined in `@theme`:
+## Testing & Agents
 
-| Variable | Color | Usage |
-|----------|-------|-------|
-| `--color-accent` | `#6B4226` | Primary buttons, espresso brown |
-| `--color-accent-light` | `#8B6F47` | Button hover, coffee brown |
-| `--color-marked` | `#F4E8D8` | Marked squares, cream/cappuccino foam |
-| `--color-marked-border` | `#8B6F47` | Marked square borders |
-| `--color-bingo` | `#D4A574` | Winning squares, caramel |
-| `--color-bg` | `#FAF7F2` | App background, warm parchment |
-| `--color-surface` | `#FFF8F0` | Cards/surfaces, cream white |
-| `--color-border` | `#E0D5C7` | Borders, latte tone |
-| `--color-text-primary` | `#3E2723` | Headings, dark espresso |
-| `--color-text-secondary` | `#6B4226` | Body text, medium coffee |
-| `--color-text-muted` | `#8D7B68` | Subtle text, mocha |
+Vitest + jsdom + `@testing-library/react`. Tests co-located in `src/utils/*.test.ts`.
+Agents: `Quiz Master` (questions), `Pixel Jam` (UI), `TDD Supervisor` (TDD cycle), `UI Review`.
 
-### Typography
-- **Font family**: Georgia serif for warmth (fallback to system fonts)
-- **Weights**: 400 (regular), 600 (semibold), 700 (bold)
-- **Icons**: ☕ coffee cup emoji for branding
+## Pitfalls
 
-### Component Patterns
-- **Shadows**: Warm brown undertones `rgba(107, 66, 38, 0.08)`
-- **Borders**: 2px for emphasis (marked squares), 1px for subtle dividers
-- **Rounded**: `rounded-lg` (8px) for buttons/cards, `rounded-xl` (12px) for modals
-- **Hover states**: Lighten background to `#F0E8DC` (warm cream)
-- **Active states**: Use `var(--color-accent-light)` for buttons
-
-### Design Rules
-- Always use CSS custom properties via inline styles (`style={{ backgroundColor: 'var(--color-accent)' }}`)
-- Maintain warm color harmony - avoid pure grays, blues, or greens
-- All interactive elements need coffee-themed hover states
-- Keep serif font for headings, maintain readability at small sizes
-
-## Common Tasks
-- **Add questions**: Edit [questions.ts](../src/data/questions.ts) array
-- **Fix logic**: Tests first in [bingoLogic.test.ts](../src/utils/bingoLogic.test.ts), pure functions only
-- **Deploy**: Auto on push to `main` via GitHub Pages
+- `vite.config.ts` sets `base` from `VITE_REPO_NAME` env var (GitHub Pages)
+- Board index `12` is always the free center space
+- Do not import types from `src/utils/bingoLogic.ts` — use `src/types/index.ts`
